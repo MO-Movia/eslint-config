@@ -3,7 +3,7 @@
 This package was built to ensure consistant linting and better coding standards across all MO apps.
 
 ## Requirements
-Before you can start using the eslint-config your application but have the following dev-dependecies associated with your apps version of Angular:
+Before you can start using the eslint-config your application must have the following dev-dependecies associated with your apps version of Angular:
   - `eslint`
   - `@angular-devkit/build-angular`
   - `@angular-eslint/builder`
