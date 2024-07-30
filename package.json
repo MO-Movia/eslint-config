@@ -21,6 +21,9 @@
     "@typescript-eslint/parser": "^7.15.0",
     "eslint-plugin-import-newlines": "^1.4.0"
   },
+  "devDependencies": {
+    "@cyclonedx/cyclonedx-npm": "^1.14.0"
+  },
   "peerDependencies": {
     "@angular-devkit/build-angular": ">= 17",
     "@angular-eslint/builder": ">= 17",
