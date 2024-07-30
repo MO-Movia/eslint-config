@@ -5,6 +5,9 @@
   "main": "index.js",
   "author": "Tyler Newton (tnewtonMo)",
   "license": "MIT",
+  "scripts": {
+    "ci:bom": "cyclonedx-npm --ignore-npm-errors --output-format XML --output-file bom.xml"
+  },
   "publishConfig": {
     "access": "public"
   },
