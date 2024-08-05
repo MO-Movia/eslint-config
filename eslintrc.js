@@ -28,6 +28,8 @@ module.exports = {
             allowTemplateLiterals: true
           }
         ],
+        'object-curly-spacing': ['error', 'always'],
+        'brace-style': 'error',
         'space-before-blocks': 2,
         'keyword-spacing': 2,
         'max-len': [
