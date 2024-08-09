@@ -16,11 +16,11 @@ module.exports = {
     {
       files: ['*.ts'],
       extends: [
+        'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:@angular-eslint/recommended',
         'plugin:@angular-eslint/template/process-inline-templates',
-        'plugin:jest-formatting/recommended',
-        'eslint:recommended'
+        'plugin:jest-formatting/recommended'
       ],
       rules: {
         indent: ['error', 2],
