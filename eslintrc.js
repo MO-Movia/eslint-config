@@ -7,15 +7,20 @@ module.exports = {
   ],
   parserOptions: { ecmaVersion: 'latest' },
   env: { es6: true },
-  plugins: ['@stylistic', 'import-newlines'],
+  plugins: [
+    '@stylistic',
+    'import-newlines',
+    'jest-formatting'
+  ],
   overrides: [
     {
       files: ['*.ts'],
       extends: [
-        'eslint:recommended',
         'plugin:@typescript-eslint/recommended',
         'plugin:@angular-eslint/recommended',
-        'plugin:@angular-eslint/template/process-inline-templates'
+        'plugin:@angular-eslint/template/process-inline-templates',
+        'plugin:jest-formatting/recommended',
+        'eslint:recommended'
       ],
       rules: {
         indent: ['error', 2],
