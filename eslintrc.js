@@ -46,6 +46,14 @@ module.exports = {
             ignoreUrls: true
           }
         ],
+        'no-mixed-spaces-and-tabs': 'error',
+        'no-trailing-spaces': 'error',
+        'no-multi-spaces': [
+          'error',
+          {
+            'ignoreEOLComments': true
+          }
+        ],
         'no-multiple-empty-lines': [
           'error',
           {
