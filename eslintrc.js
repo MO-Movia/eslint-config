@@ -99,7 +99,7 @@ module.exports = {
           'error',
           {
             type: 'attribute',
-            prefix: 'mo',
+            prefix: ['mo', 'maw'],
             style: 'camelCase'
           }
         ],
@@ -107,7 +107,7 @@ module.exports = {
           'error',
           {
             type: 'element',
-            prefix: 'mo',
+            prefix: ['mo', 'maw'],
             style: 'kebab-case'
           }
         ]
