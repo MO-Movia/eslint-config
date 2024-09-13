@@ -23,20 +23,10 @@ module.exports = {
         'plugin:jest-formatting/recommended'
       ],
       rules: {
-        indent: ['error', 2],
-        semi: ['error', 'always'],
-        quotes: [
+        'import-newlines/enforce': [
           'error',
-          'single',
-          {
-            avoidEscape: true,
-            allowTemplateLiterals: true
-          }
+          { items: 3 }
         ],
-        'object-curly-spacing': ['error', 'always'],
-        'brace-style': 'error',
-        'space-before-blocks': 2,
-        'keyword-spacing': 2,
         'max-len': [
           'error',
           {
@@ -46,15 +36,28 @@ module.exports = {
             ignoreUrls: true
           }
         ],
-        'no-mixed-spaces-and-tabs': 'error',
-        'no-trailing-spaces': 'error',
-        'no-multi-spaces': [
+        'prefer-arrow-callback': 'error',
+        '@stylistic/indent': ['error', 2],
+        '@stylistic/semi': ['error', 'always'],
+        '@stylistic/quotes': [
+          'error',
+          'single',
+          {
+            avoidEscape: true,
+            allowTemplateLiterals: true
+          }
+        ],
+        '@stylistic/object-curly-spacing': ['error', 'always'],
+        '@stylistic/brace-style': 'error',
+        '@stylistic/space-before-blocks': 2,
+        '@stylistic/keyword-spacing': 2,
+        '@stylistic/no-multi-spaces': [
           'error',
           {
             'ignoreEOLComments': true
           }
         ],
-        'no-multiple-empty-lines': [
+        '@stylistic/no-multiple-empty-lines': [
           'error',
           {
             max: 1,
@@ -62,7 +65,7 @@ module.exports = {
             maxBOF: 0
           }
         ],
-        'lines-between-class-members': [
+        '@stylistic/lines-between-class-members': [
           'error',
           {
             enforce: [
@@ -74,7 +77,10 @@ module.exports = {
             ]
           }
         ],
-        'prefer-arrow-callback': 'error',
+        '@stylistic/no-trailing-spaces': 'error',
+        '@stylistic/no-mixed-spaces-and-tabs': 'error',
+        '@stylistic/block-spacing': 'error',
+        '@stylistic/arrow-spacing': 'error',
         '@typescript-eslint/explicit-member-accessibility': [
           'error',
           { 
@@ -88,12 +94,6 @@ module.exports = {
           {
             allowTypedFunctionExpressions: true
           }
-        ],
-        '@stylistic/block-spacing': 'error',
-        '@stylistic/arrow-spacing': 'error',
-        'import-newlines/enforce': [
-          'error',
-          { items: 3 }
         ],
         '@angular-eslint/directive-selector': [
           'error',
