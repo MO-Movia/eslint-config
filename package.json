@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/eslint-config",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "Module containing the lint configuring for MO",
   "main": "index.js",
   "author": "Tyler Newton (tnewtonMo)",
