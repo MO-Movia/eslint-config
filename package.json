@@ -1,8 +1,9 @@
 {
   "name": "@modusoperandi/eslint-config",
-  "version": "1.6.1",
+  "version": "2.0.0-rc.0",
   "description": "Module containing the lint configuring for MO",
-  "main": "index.js",
+  "main": "main.js",
+  "type": "module",
   "author": "Tyler Newton (tnewtonMo)",
   "license": "MIT",
   "scripts": {
@@ -15,24 +16,33 @@
     "type": "git",
     "url": "git+https://github.com/MO-Movia/eslint-config.git"
   },
+  "peerDependencies": {
+    "eslint": "^9.0.0",
+    "angular-eslint": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "angular-eslint": {
+      "optional": true
+    }
+  },
   "dependencies": {
-    "@stylistic/eslint-plugin": "^2.8.0",
-    "eslint-plugin-import-newlines": "^1.4.0",
-    "eslint-plugin-jest-formatting": "^3.1.0"
+    "@eslint/js": "^9.11.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-import": "^2.30.0",
+    "eslint-plugin-jest": "^28.8.3",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-sonarjs": "^2.0.3",
+    "eslint-plugin-storybook": "^0.9.0",
+    "typescript-eslint": "^8.7.0"
   },
   "devDependencies": {
-    "@cyclonedx/cyclonedx-npm": "^1.14.0"
+    "@cyclonedx/cyclonedx-npm": "^1.14.0",
+    "@types/eslint__js": "^8.42.3",
+    "angular-eslint": "^18.0.0"
   },
-  "peerDependencies": {
-    "@angular-devkit/build-angular": ">= 17",
-    "@angular-eslint/builder": ">= 17",
-    "@angular-eslint/eslint-plugin": ">= 17",
-    "@angular-eslint/eslint-plugin-template": ">= 17",
-    "@angular-eslint/schematics": ">= 17",
-    "@angular-eslint/template-parser": ">= 17",
-    "@typescript-eslint/eslint-plugin": ">= 7",
-    "@typescript-eslint/parser": ">= 7",
-    "eslint": ">= 8"
+  "overrides": {
+    "eslint": "^9.0.0",
+    "libxmljs2": "^1.0.0"
   },
   "private": false
 }
