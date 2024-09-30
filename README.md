@@ -17,10 +17,14 @@ as long as all angular-eslint packages are v18.
 
 1. Run `npm i -D @modusoperandi/eslint-config` to install the package as a dev dependency.
    If using Angular, follow the Angular instructions to enable Linting with ESLint.
+   1. Remove all eslint dependencies asside from eslint and angular-lint from your dev-dependnecies.
 2. In the root of your project create a new file named `.eslint.config.js`. (or copy the example .eslint.config.js in this repo)
+   package.json should specify `"type": "module"`, and karma.config and custom-webpack should either be cjs files or converted to module syntax.
 3. In your new file add the following code:
-   <code>import { getConfig } from '@modusoperandi/eslint-config';
-   export default [...getFlatConfig('mo',false)];</code>
+   ```javascript
+   import { getFlatConfig } from '@modusoperandi/eslint-config';
+   export default [...getFlatConfig('mo', false)];
+   ```
 4. Change `mo` to the prefix of your Angular app/lib, or set to null if this isn't an Angular project.
 5. Run `ng lint` (Angular) or `eslint` (Basic) in a script to ensure functionality. Add `--max-warnings=0` to make these rules strict, or `--quite` to ignore warnings.
 
