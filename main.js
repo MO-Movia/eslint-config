@@ -110,12 +110,17 @@ export function getFlatConfig(app = undefined, strict = false) {
         },
       },
       rules: {
+        '@typescript-eslint/unbound-method': 'off', // these are rarely typed correctly in external libraries
+        '@typescript-eslint/no-unsafe-argument': strict ? 'error' : 'off',
+        '@typescript-eslint/no-unsafe-assignment': strict ? 'error' : 'off',
+        '@typescript-eslint/no-unsafe-call': strict ? 'error' : 'off',
+        '@typescript-eslint/no-unsafe-member-access': strict ? 'error' : 'off',
         // use ngx-logger instead of console for info/debug logs
         'no-console': ['error', { allow: ['warn', 'error'] }],
         'prefer-arrow-callback': 'error',
         'import/no-unresolved': 'off', // checked by ts
         'import/namespace': 'off', // not suppoted yet for ESLint 9
-        'import/no-deprecated': 'off', // not suppoted yet for ESLint 9
+        'import/no-deprecated': 'off', // not suppoted yet for ESLint 9 and covered by sonarjs
         'import/no-extraneous-dependencies': 'error',
         'import/no-absolute-path': 'error',
         'import/no-cycle': 'error',
