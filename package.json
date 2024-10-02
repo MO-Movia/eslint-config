@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/eslint-config",
-  "version": "2.0.0-rc.1",
+  "version": "2.0.0-rc.2",
   "description": "Module containing the lint configuring for MO",
   "main": "main.js",
   "type": "module",
@@ -33,6 +33,7 @@
     "eslint-plugin-prettier": "^5.2.1",
     "eslint-plugin-sonarjs": "^2.0.3",
     "eslint-plugin-storybook": "^0.9.0",
+    "globals": "^15.10.0",
     "typescript-eslint": "^8.7.0"
   },
   "devDependencies": {
