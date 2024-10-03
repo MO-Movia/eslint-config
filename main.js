@@ -1,80 +1,74 @@
 // @ts-check
-
-import eslintjs from '@eslint/js';
-import tseslint from 'typescript-eslint';
-import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
-import globals from 'globals';
-import sonarjs from 'eslint-plugin-sonarjs';
-import jest from 'eslint-plugin-jest';
-import { flatConfigs as importPlugin } from 'eslint-plugin-import';
-
-const angularLint = await import('angular-eslint')
-  .then((module) => module.default)
-  .catch(() => {
-    console &&
-      console.log('angular-eslint not installed. Excluded from linting');
-    // filler
-    return {
-      processInlineTemplates: undefined,
-      configs: {
-        tsAll: [],
-        tsRecommended: [],
-        templateAll: [],
-        templateRecommended: [],
-        templateAccessibility: [],
-      },
-    };
-  });
-
+const eslintjs = require('@eslint/js');
+const typescript_eslint = require('typescript-eslint');
+const prettier = require('eslint-plugin-prettier/recommended');
+const globals = require('globals');
+const sonarjs = require('eslint-plugin-sonarjs');
+const jest = require('eslint-plugin-jest');
+const importPlugin = require('eslint-plugin-import');
+let angularLint;
+try {
+  angularLint = require('angular-eslint');
+} catch (e) {
+  console &&
+    console.warn('angular-eslint not installed. Excluded from linting');
+  // filler
+  angularLint = {
+    processInlineTemplates: undefined,
+    configs: {
+      tsAll: [],
+      tsRecommended: [],
+      templateAll: [],
+      templateRecommended: [],
+      templateAccessibility: [],
+    },
+  };
+}
 /**
  * Base recommended rules. Angular projects should also use {@link ngRecommended} and {@link templateRecommended}
  */
 const tsRecommendedBase = [
   eslintjs.configs.recommended,
-  ...tseslint.configs.recommendedTypeChecked,
-  ...tseslint.configs.stylisticTypeChecked,
-  importPlugin.recommended,
-  importPlugin.typescript,
+  ...typescript_eslint.configs.recommendedTypeChecked,
+  // @ts-ignore
+  importPlugin.flatConfigs.recommended,
+  // @ts-ignore
+  importPlugin.flatConfigs.typescript,
   sonarjs.configs.recommended,
 ];
-
-/**
- * Strict recommended rules. Angular projects should also use {@link ngRecommended} and {@link templateRecommended}
- */
 const tsRecommendedStrict = [
   ...tsRecommendedBase,
-  eslintPluginPrettierRecommended,
+  ...typescript_eslint.configs.stylisticTypeChecked,
+  prettier,
 ];
-
-/**
- * Angular recommended Typescript rules. Angular projects should also use {@link templateRecommended}
- */
 const ngRecommended = [...angularLint.configs.tsRecommended];
-
-/**
- * Angular recommended html template rules. Angular projects should also use {@link ngRecommended}
- */
 const templateRecommended = [
   ...angularLint.configs.templateRecommended,
   // accessibility included because it overlaps with sonar html rules
   ...angularLint.configs.templateAccessibility,
+  prettier,
 ];
-
 /**
  *
- * @param {string | undefined | null} app prefix to use for the angular library.
+ * @param { {strict?: boolean, appPrefix?: string, tsconfigDir?: string } | undefined } options prefix to use for the angular library.
  * For non-Angular projects, Angular rules are excluded if not provided. default undefined
- * @param {boolean | undefined | null} strict whether to use the stricter set of rule configurations. default false
+ * @param options.appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
+ * @param options.strict { boolean | undefined | null } strict whether to use the stricter set of rule configurations. default false
+ * @param options.tsconfigDir { string | undefined | null } location of tsconfig to use. default './tsconfig.spec.json' for angular apps else './tsconfig.json'
  * @returns a preconfigured flat ESLint configuration
  */
-export function getFlatConfig(app = undefined, strict = false) {
+function getFlatConfig(options = {}) {
+  const strict = !!options.strict;
   const isAngular = !!(
-    angularLint &&
-    typeof app === 'string' &&
-    app.trim() !== ''
+    angularLint.processInlineTemplates &&
+    typeof options.appPrefix === 'string' &&
+    options.appPrefix.trim() !== ''
   );
-  strict = !!strict;
-  return tseslint.config(
+  const app = options.appPrefix;
+  const tsConfigLocation =
+    options.tsconfigDir ??
+    (isAngular ? './tsconfig.spec.json' : './tsconfig.json');
+  return typescript_eslint.default.config(
     {
       name: 'Global',
       ignores: [
@@ -96,12 +90,12 @@ export function getFlatConfig(app = undefined, strict = false) {
         ...(strict ? tsRecommendedStrict : tsRecommendedBase),
         ...(isAngular ? ngRecommended : []),
       ],
-      processor: app ? angularLint.processInlineTemplates : undefined,
+      processor: isAngular ? angularLint.processInlineTemplates : undefined,
       languageOptions: {
         parserOptions: {
-          project: isAngular ? './tsconfig.spec.json' : './tsconfig.json',
+          project: tsConfigLocation,
           projectService: true,
-          tsconfigRootDir: import.meta.dirname,
+          tsconfigRootDir: __dirname,
         },
         globals: {
           ...globals.jasmine,
@@ -167,10 +161,14 @@ export function getFlatConfig(app = undefined, strict = false) {
       },
     },
     {
-      name: 'Angular Templates',
-      files: ['**/*.html'],
-      extends: [...(isAngular ? templateRecommended : [])],
-      rules: {},
+      ...(isAngular
+        ? {
+            name: 'Angular Templates',
+            files: ['**/*.html'],
+            extends: templateRecommended,
+            rules: {},
+          }
+        : {}),
     },
     {
       name: 'Test Files',
@@ -186,15 +184,16 @@ export function getFlatConfig(app = undefined, strict = false) {
     }
   );
 }
-
 /**
  * A default configuration for Angular apps and libraries
  */
-export const angularRecommended = getFlatConfig('mo', false);
-
+exports.angularRecommended = getFlatConfig({
+  appPrefix: 'mo',
+  strict: false,
+});
 /**
  * Adefault configuration for plain typescript apps and libraries
  */
-export const tsRecommended = getFlatConfig();
-
-export default angularRecommended;
+exports.tsRecommended = getFlatConfig();
+exports.getFlatConfig = getFlatConfig;
+exports.default = exports.angularRecommended;
