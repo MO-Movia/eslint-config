@@ -46,6 +46,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# MIGMONG: ignore sonarqube temp file and coverage output
+# ignore sonarqube temp file and coverage output
 .scannerwork
 coverage
