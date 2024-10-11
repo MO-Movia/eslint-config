@@ -7,10 +7,11 @@ import type { TSESLint } from '@typescript-eslint/utils';
  * @param {boolean | undefined | null} strict whether to use the stricter set of rule configurations. default false
  * @returns a preconfigured flat ESLint configuration
  */
-export function getFlatConfig(
-  app: string | undefined | null,
-  strict: boolean | undefined | null
-): TSESLint.FlatConfig.ConfigArray;
+export function getFlatConfig(options?: {
+  strict?: boolean;
+  appPrefix?: string;
+  tsconfigDir?: string;
+}): TSESLint.FlatConfig.ConfigArray;
 
 /**
  * A default configuration for Angular apps and libraries
@@ -22,4 +23,4 @@ export const angularRecommended: TSESLint.FlatConfig.ConfigArray;
  */
 export const tsRecommended: TSESLint.FlatConfig.ConfigArray;
 
-export default angularRecommended;
+export default getFlatConfig;
