@@ -52,9 +52,9 @@ const templateRecommended = [
  *
  * @param { {strict?: boolean, appPrefix?: string, tsconfigDir?: string } | undefined } options prefix to use for the angular library.
  * For non-Angular projects, Angular rules are excluded if not provided. default undefined
- * @param options.appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
- * @param options.strict { boolean | undefined | null } strict whether to use the stricter set of rule configurations. default false
- * @param options.tsconfigDir { string | undefined | null } location of tsconfig to use. default './tsconfig.spec.json' for angular apps else './tsconfig.json'
+ * - appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
+ * - strict { boolean | undefined | null } strict whether to use the stricter set of rule configurations. default false
+ * - tsconfigDir { string | undefined | null } location of tsconfig to use. default './tsconfig.spec.json' for angular apps else './tsconfig.json'
  * @returns a preconfigured flat ESLint configuration
  */
 function getFlatConfig(options = {}) {
@@ -90,7 +90,8 @@ function getFlatConfig(options = {}) {
         ...(strict ? tsRecommendedStrict : tsRecommendedBase),
         ...(isAngular ? ngRecommended : []),
       ],
-      processor: isAngular ? angularLint.processInlineTemplates : undefined,
+      // can't use processor: undefined because of runtime bug in eslint.
+      ...(isAngular ? { processor: angularLint.processInlineTemplates } : {}),
       languageOptions: {
         parserOptions: {
           project: tsConfigLocation,
@@ -109,6 +110,19 @@ function getFlatConfig(options = {}) {
         '@typescript-eslint/no-unsafe-assignment': strict ? 'error' : 'off',
         '@typescript-eslint/no-unsafe-call': strict ? 'error' : 'off',
         '@typescript-eslint/no-unsafe-member-access': strict ? 'error' : 'off',
+        // emulate default tsc rules
+        '@typescript-eslint/no-unused-vars': [
+          'error',
+          {
+            args: 'all',
+            argsIgnorePattern: '^_',
+            caughtErrors: 'all',
+            caughtErrorsIgnorePattern: '^_',
+            destructuredArrayIgnorePattern: '^_',
+            varsIgnorePattern: '^_',
+            ignoreRestSiblings: true,
+          },
+        ],
         // use ngx-logger instead of console for info/debug logs
         'no-console': ['error', { allow: ['warn', 'error'] }],
         'prefer-arrow-callback': 'error',
@@ -196,4 +210,4 @@ exports.angularRecommended = getFlatConfig({
  */
 exports.tsRecommended = getFlatConfig();
 exports.getFlatConfig = getFlatConfig;
-exports.default = exports.angularRecommended;
+exports.default = getFlatConfig;
