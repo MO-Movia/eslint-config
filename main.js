@@ -3,15 +3,13 @@ const eslintjs = require('@eslint/js');
 const typescript_eslint = require('typescript-eslint');
 const prettier = require('eslint-plugin-prettier/recommended');
 const globals = require('globals');
-const sonarjs = require('eslint-plugin-sonarjs');
 const jest = require('eslint-plugin-jest');
 const importPlugin = require('eslint-plugin-import');
 let angularLint;
 try {
   angularLint = require('angular-eslint');
 } catch (e) {
-  console &&
-    console.warn('angular-eslint not installed. Excluded from linting');
+  console?.warn('angular-eslint not installed. Excluded from linting');
   // filler
   angularLint = {
     processInlineTemplates: undefined,
@@ -26,22 +24,29 @@ try {
 }
 /**
  * Base recommended rules. Angular projects should also use {@link ngRecommended} and {@link templateRecommended}
+ * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
  */
 const tsRecommendedBase = [
   eslintjs.configs.recommended,
   ...typescript_eslint.configs.recommendedTypeChecked,
-  // @ts-ignore
-  importPlugin.flatConfigs.recommended,
-  // @ts-ignore
-  importPlugin.flatConfigs.typescript,
-  sonarjs.configs.recommended,
+  importPlugin.flatConfigs?.recommended,
+  importPlugin.flatConfigs?.typescript,
 ];
+/**
+ * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
+ */
 const tsRecommendedStrict = [
   ...tsRecommendedBase,
   ...typescript_eslint.configs.stylisticTypeChecked,
   prettier,
 ];
+/**
+ * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
+ */
 const ngRecommended = [...angularLint.configs.tsRecommended];
+/**
+ * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
+ */
 const templateRecommended = [
   ...angularLint.configs.templateRecommended,
   // accessibility included because it overlaps with sonar html rules
@@ -127,8 +132,8 @@ function getFlatConfig(options = {}) {
         'no-console': ['error', { allow: ['warn', 'error'] }],
         'prefer-arrow-callback': 'error',
         'import/no-unresolved': 'off', // checked by ts
-        'import/namespace': 'off', // not suppoted yet for ESLint 9
-        'import/no-deprecated': 'off', // not suppoted yet for ESLint 9 and covered by sonarjs
+        'import/namespace': 'off', // not suppoted yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/3099
+        'import/no-deprecated': 'off', // not suppoted yet for ESLint 9 and covered by sonarjs https://github.com/import-js/eslint-plugin-import/issues/2245
         'import/no-extraneous-dependencies': 'error',
         'import/no-absolute-path': 'error',
         'import/no-cycle': 'error',
@@ -187,13 +192,26 @@ function getFlatConfig(options = {}) {
     {
       name: 'Test Files',
       ...jest.configs['flat/recommended'],
-      files: ['**/test/**/*.ts', '**/*.spec.ts'],
+      files: [
+        '**/test/**/*.ts',
+        '**/*.test.ts',
+        '**/*.test.tsx',
+        '**/*.spec.ts',
+      ],
       rules: {
         ...jest.configs['flat/recommended'].rules,
         // disable rules not compatible with jasmine
         'jest/no-alias-methods': 'off',
         'jest/no-deprecated-functions': 'off',
         'jest/no-jasmine-globals': 'off',
+        // Allow accessing private/protected fields in tests
+        '@typescript-eslint/dot-notation': [
+          'error',
+          {
+            allowPrivateClassPropertyAccess: true,
+            allowProtectedClassPropertyAccess: true,
+          },
+        ],
       },
     }
   );
