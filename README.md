@@ -12,13 +12,10 @@ Before you can start using the eslint-config your application must have the foll
 
 ## Installation & Setup
 
-Note for Angular projects. angular-eslint v18 is compatible with Angular v17 (required for using ESLint 9 on an Angular 17 project)
-as long as all angular-eslint packages are v18.
-
 1. Run `npm i -D @modusoperandi/eslint-config` to install the package as a dev dependency.
-   If using Angular, follow the Angular instructions to enable Linting with ESLint.
+   If using Angular, follow the [Angular ESLint instructions](https://github.com/angular-eslint/angular-eslint) to enable Linting with ESLint, and make sure `angular-eslint` is installed.
    1. Remove all eslint dependencies aside from eslint and angular-lint from your dev-dependencies.
-2. Copy the `.eslint.config.js` from this repo to the root of your project.
+2. Copy the `eslint.config.js` from this repo to the root of your project.
 3. Change `mo` to the prefix of your Angular app/lib, or set to null if this isn't an Angular project.
 4. Run `ng lint` (Angular) or `eslint` (Basic) in a script to ensure functionality. Add `--max-warnings=0` to make these rules strict, or `--quite` to ignore warnings.
 
@@ -27,7 +24,7 @@ as long as all angular-eslint packages are v18.
 1. Add the .gitattributes from this project to your project to prevent End Of Line (EOL) issues in your repo.
 2. If you are using VSCode, Make sure you have the following extensions that help with these rules.
 
-- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+- [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) (you may need to turn on "use flat config" setting)
 - [Angular Language Service](https://marketplace.visualstudio.com/items?itemName=Angular.ng-template)
 - [SonarLint](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode)
 - (for strict) [Prettier - Code formatter](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
