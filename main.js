@@ -9,7 +9,6 @@ let angularLint;
 try {
   angularLint = require('angular-eslint');
 } catch (e) {
-  console?.warn('angular-eslint not installed. Excluded from linting');
   // filler
   angularLint = {
     processInlineTemplates: undefined,
@@ -65,10 +64,13 @@ const templateRecommended = [
 function getFlatConfig(options = {}) {
   const strict = !!options.strict;
   const isAngular = !!(
-    angularLint.processInlineTemplates &&
-    typeof options.appPrefix === 'string' &&
-    options.appPrefix.trim() !== ''
+    typeof options.appPrefix === 'string' && options.appPrefix.trim() !== ''
   );
+  if (isAngular && !angularLint?.processInlineTemplates) {
+    throw new Error(
+      'angular-eslint not installed! Install angular-eslint or remove appPrefix from config.'
+    );
+  }
   const app = options.appPrefix;
   const tsConfigLocation =
     options.tsconfigDir ??
