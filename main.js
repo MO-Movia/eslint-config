@@ -221,13 +221,14 @@ function getFlatConfig(options = {}) {
 /**
  * A default configuration for Angular apps and libraries
  */
-exports.angularRecommended = getFlatConfig({
-  appPrefix: 'mo',
-  strict: false,
-});
+exports.angularRecommended = () =>
+  getFlatConfig({
+    appPrefix: 'mo',
+    strict: false,
+  });
 /**
  * Adefault configuration for plain typescript apps and libraries
  */
-exports.tsRecommended = getFlatConfig();
+exports.tsRecommended = () => getFlatConfig();
 exports.getFlatConfig = getFlatConfig;
 exports.default = getFlatConfig;

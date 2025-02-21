@@ -16,11 +16,11 @@ export function getFlatConfig(options?: {
 /**
  * A default configuration for Angular apps and libraries
  */
-export const angularRecommended: TSESLint.FlatConfig.ConfigArray;
+export const angularRecommended: () => TSESLint.FlatConfig.ConfigArray;
 
 /**
  * Adefault configuration for plain typescript apps and libraries
  */
-export const tsRecommended: TSESLint.FlatConfig.ConfigArray;
+export const tsRecommended: () => TSESLint.FlatConfig.ConfigArray;
 
 export default getFlatConfig;
