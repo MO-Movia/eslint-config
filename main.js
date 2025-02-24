@@ -92,7 +92,7 @@ function getFlatConfig(options = {}) {
     },
     {
       name: 'Typescript',
-      files: ['**/*.ts'],
+      files: ['**/*.ts', '**/*.tsx'],
       extends: [
         ...(strict ? tsRecommendedStrict : tsRecommendedBase),
         ...(isAngular ? ngRecommended : []),
@@ -196,9 +196,11 @@ function getFlatConfig(options = {}) {
       ...jest.configs['flat/recommended'],
       files: [
         '**/test/**/*.ts',
+        '**/test/**/*.tsx',
         '**/*.test.ts',
         '**/*.test.tsx',
         '**/*.spec.ts',
+        '**/*.spec.tsx',
       ],
       rules: {
         ...jest.configs['flat/recommended'].rules,
