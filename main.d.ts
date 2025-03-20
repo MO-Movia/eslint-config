@@ -2,15 +2,16 @@
 import type { TSESLint } from '@typescript-eslint/utils';
 
 /**
- * @param {string | undefined | null} app prefix to use for the angular library.
- * For non-Angular projects, Angular rules are excluded if not provided. default undefined
- * @param {boolean | undefined | null} strict whether to use the stricter set of rule configurations. default false
+ * All tsconfig files in project are considered when linting.
+ *
+ * @param { {strict?: boolean, appPrefix?: string } | undefined } options config for base ruleset.
+ * - appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
+ * - strict { boolean | undefined | null } Whether to use the stricter set of rule configurations. default false
  * @returns a preconfigured flat ESLint configuration
  */
 export function getFlatConfig(options?: {
   strict?: boolean;
   appPrefix?: string;
-  tsconfigDir?: string;
 }): TSESLint.FlatConfig.ConfigArray;
 
 /**

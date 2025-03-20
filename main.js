@@ -5,6 +5,7 @@ const prettier = require('eslint-plugin-prettier/recommended');
 const globals = require('globals');
 const jest = require('eslint-plugin-jest');
 const importPlugin = require('eslint-plugin-import');
+const sonar = require('eslint-plugin-sonarjs');
 let angularLint;
 try {
   angularLint = require('angular-eslint');
@@ -30,6 +31,7 @@ const tsRecommendedBase = [
   ...typescript_eslint.configs.recommendedTypeChecked,
   importPlugin.flatConfigs?.recommended,
   importPlugin.flatConfigs?.typescript,
+  sonar.configs.recommended
 ];
 /**
  * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
@@ -53,12 +55,11 @@ const templateRecommended = [
   prettier,
 ];
 /**
+ * All tsconfig files in project are considered when linting.
  *
- * @param { {strict?: boolean, appPrefix?: string, tsconfigDir?: string } | undefined } options prefix to use for the angular library.
- * For non-Angular projects, Angular rules are excluded if not provided. default undefined
+ * @param { {strict?: boolean, appPrefix?: string } | undefined } options config for base ruleset.
  * - appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
- * - strict { boolean | undefined | null } strict whether to use the stricter set of rule configurations. default false
- * - tsconfigDir { string | undefined | null } location of tsconfig to use. default './tsconfig.spec.json' for angular apps else './tsconfig.json'
+ * - strict { boolean | undefined | null } Whether to use the stricter set of rule configurations. default false
  * @returns a preconfigured flat ESLint configuration
  */
 function getFlatConfig(options = {}) {
@@ -72,9 +73,6 @@ function getFlatConfig(options = {}) {
     );
   }
   const app = options.appPrefix;
-  const tsConfigLocation =
-    options.tsconfigDir ??
-    (isAngular ? './tsconfig.spec.json' : './tsconfig.json');
   return typescript_eslint.default.config(
     {
       name: 'Global',
@@ -101,9 +99,9 @@ function getFlatConfig(options = {}) {
       ...(isAngular ? { processor: angularLint.processInlineTemplates } : {}),
       languageOptions: {
         parserOptions: {
-          project: tsConfigLocation,
-          projectService: true,
-          tsconfigRootDir: __dirname,
+          // load all tsconfig files so that closest inclusive one is used.
+          project: ['./**/tsconfig.json', './**/tsconfig.*.json'],
+          tsconfigRootDir: ".",
         },
         globals: {
           ...globals.jasmine,
@@ -112,6 +110,7 @@ function getFlatConfig(options = {}) {
         },
       },
       rules: {
+        "eslint/no-ternary": 'off', // Turned on by sonar-lint. Nested is still banned so this is overly strict.
         '@typescript-eslint/unbound-method': 'off', // these are rarely typed correctly in external libraries
         '@typescript-eslint/no-unsafe-argument': strict ? 'error' : 'off',
         '@typescript-eslint/no-unsafe-assignment': strict ? 'error' : 'off',

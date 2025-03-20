@@ -1,10 +1,9 @@
 {
   "name": "@modusoperandi/eslint-config",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Module containing the lint configuring for MO",
   "main": "main.js",
   "type": "commonjs",
-  "author": "Tyler Newton (tnewtonMo)",
   "license": "MIT",
   "scripts": {
     "ci:bom": "cyclonedx-npm --ignore-npm-errors --output-format XML --output-file bom.xml"
@@ -12,6 +11,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "main.js",
+    "main.d.ts"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/MO-Movia/eslint-config.git"
@@ -35,6 +38,7 @@
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jest": "^28.9.0",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-sonarjs": "^3.0.2",
     "globals": "^15.12.0",
     "prettier": "^3.3.3",
     "typescript-eslint": "^8.16.0"
@@ -42,7 +46,7 @@
   "devDependencies": {
     "@cyclonedx/cyclonedx-npm": "^2.0.0",
     "@types/eslint__js": "^8.42.3",
-    "angular-eslint": "^18.0.0"
+    "angular-eslint": ">=18.0.0"
   },
   "overrides": {
     "libxmljs2": "^1.0.0"
