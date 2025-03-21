@@ -140,6 +140,8 @@ function getFlatConfig(options = {}) {
         'import/no-cycle': 'error',
         'import/no-self-import': 'error',
         'import/no-useless-path-segments': 'warn',
+        'sonarjs/no-unsafe-unzip': 'off', // cannot be satisfied. Track is SonarQube instead
+        'sonarjs/function-return-type': 'off', // is too often wrong
         'no-restricted-imports': [
           'error',
           {
