@@ -205,10 +205,12 @@ function getFlatConfig(options = {}) {
       ],
       rules: {
         ...jest.configs['flat/recommended'].rules,
+        'jest/expect-expect': 'error', // upgrade from warning to error
         // disable rules not compatible with jasmine
         'jest/no-alias-methods': 'off',
         'jest/no-deprecated-functions': 'off',
         'jest/no-jasmine-globals': 'off',
+        'jest/no-test-prefixes': 'off',
         // Allow accessing private/protected fields in tests
         '@typescript-eslint/dot-notation': [
           'error',
