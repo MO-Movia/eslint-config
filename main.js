@@ -55,12 +55,18 @@ const templateRecommended = [
   prettier,
 ];
 const TEST_FILES = [
+  // Test Resources
+  '**/testing/**/*.ts',
+  '**/testing/**/*.tsx',
   '**/test/**/*.ts',
   '**/test/**/*.tsx',
+  // Test Files
   '**/*.test.ts',
   '**/*.test.tsx',
   '**/*.spec.ts',
   '**/*.spec.tsx',
+  // test init file
+  '**/test.ts',
 ];
 /**
  * All tsconfig files in project are considered when linting.
