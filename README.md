@@ -15,9 +15,11 @@ Before you can start using the eslint-config your application must have the foll
 1. Run `npm i -D @modusoperandi/eslint-config` to install the package as a dev dependency.
    If using Angular, follow the [Angular ESLint instructions](https://github.com/angular-eslint/angular-eslint) to enable Linting with ESLint, and make sure `angular-eslint` is installed.
    1. Remove all eslint dependencies aside from eslint and angular-lint from your dev-dependencies.
-2. Copy the `eslint.config.js` from this repo to the root of your project.
+2. Copy `eslint.config.js` and `.prettierrc.yml` from this repo to the root of your project.
 3. Change `mo` to the prefix of your Angular app/lib, or set to null if this isn't an Angular project.
 4. Run `ng lint` (Angular) or `eslint` (Basic) in a script to ensure functionality. Add `--max-warnings=0` to make these rules strict, or `--quite` to ignore warnings.
+
+You may use a different Prittier config for your project, but the one in this project is recommended. It is recommended to limit edits to the prettierrc to compatibility reasons, and to respect the stylistic defaults.
 
 ### Optional
 

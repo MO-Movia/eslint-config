@@ -31,7 +31,7 @@ const tsRecommendedBase = [
   ...typescript_eslint.configs.recommendedTypeChecked,
   importPlugin.flatConfigs?.recommended,
   importPlugin.flatConfigs?.typescript,
-  sonar.configs.recommended
+  sonar.configs.recommended,
 ];
 /**
  * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
@@ -53,6 +53,14 @@ const templateRecommended = [
   // accessibility included because it overlaps with sonar html rules
   ...angularLint.configs.templateAccessibility,
   prettier,
+];
+const TEST_FILES = [
+  '**/test/**/*.ts',
+  '**/test/**/*.tsx',
+  '**/*.test.ts',
+  '**/*.test.tsx',
+  '**/*.spec.ts',
+  '**/*.spec.tsx',
 ];
 /**
  * All tsconfig files in project are considered when linting.
@@ -101,7 +109,7 @@ function getFlatConfig(options = {}) {
         parserOptions: {
           // load all tsconfig files so that closest inclusive one is used.
           project: ['./**/tsconfig.json', './**/tsconfig.*.json'],
-          tsconfigRootDir: ".",
+          tsconfigRootDir: '.',
         },
         globals: {
           ...globals.jasmine,
@@ -110,8 +118,11 @@ function getFlatConfig(options = {}) {
         },
       },
       rules: {
-        "eslint/no-ternary": 'off', // Turned on by sonar-lint. Nested is still banned so this is overly strict.
+        'eslint/no-ternary': 'off', // Turned on by sonar-lint. Nested is still banned so this is overly strict.
         '@typescript-eslint/unbound-method': 'off', // these are rarely typed correctly in external libraries
+        '@typescript-eslint/explicit-function-return-type': strict // Speeds up static analysis and ensures consistent interface types
+          ? 'error'
+          : 'off',
         '@typescript-eslint/no-unsafe-argument': strict ? 'error' : 'off',
         '@typescript-eslint/no-unsafe-assignment': strict ? 'error' : 'off',
         '@typescript-eslint/no-unsafe-call': strict ? 'error' : 'off',
@@ -129,27 +140,41 @@ function getFlatConfig(options = {}) {
             ignoreRestSiblings: true,
           },
         ],
-        // use ngx-logger instead of console for info/debug logs
+        // use ngx-logger or equivelent instead of console for info/debug logs
         'no-console': ['error', { allow: ['warn', 'error'] }],
         'prefer-arrow-callback': 'error',
         'import/no-unresolved': 'off', // checked by ts
         'import/namespace': 'off', // not suppoted yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/3099
-        'import/no-deprecated': 'off', // not suppoted yet for ESLint 9 and covered by sonarjs https://github.com/import-js/eslint-plugin-import/issues/2245
-        'import/no-extraneous-dependencies': 'error',
+        'import/no-deprecated': 'off', // covered by sonar and not suppoted yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/2245
+        'import/no-extraneous-dependencies': [
+          'error',
+          {
+            devDependencies: TEST_FILES,
+          },
+        ],
         'import/no-absolute-path': 'error',
         'import/no-cycle': 'error',
         'import/no-self-import': 'error',
         'import/no-useless-path-segments': 'warn',
         'sonarjs/no-unsafe-unzip': 'off', // cannot be satisfied. Track is SonarQube instead
-        'sonarjs/function-return-type': 'off', // is too often wrong
+        'sonarjs/function-return-type': 'off', // is too often wrong due to libraries not setting this properly.
+        'sonarjs/deprecation': 'off', // missing context info for filtering. Use more accurate report from Sonar.
         'no-restricted-imports': [
           'error',
           {
+            patterns: [
+              {
+                group: ['src/*', 'project/*'],
+                // Absolute paths may cause issues with some tools that don't know the root dir.
+                message:
+                  'For better interoperability support, absolute paths should not be used.',
+              },
+            ],
             paths: [
               {
                 name: 'lodash',
                 importNames: ['Get, Set'],
-                message: 'Use proper type accessors and checks instead',
+                message: 'Use proper typed accessors and checks instead.',
               },
               {
                 name: 'lodash',
@@ -195,14 +220,7 @@ function getFlatConfig(options = {}) {
     {
       name: 'Test Files',
       ...jest.configs['flat/recommended'],
-      files: [
-        '**/test/**/*.ts',
-        '**/test/**/*.tsx',
-        '**/*.test.ts',
-        '**/*.test.tsx',
-        '**/*.spec.ts',
-        '**/*.spec.tsx',
-      ],
+      files: TEST_FILES,
       rules: {
         ...jest.configs['flat/recommended'].rules,
         'jest/expect-expect': 'error', // upgrade from warning to error
@@ -211,6 +229,9 @@ function getFlatConfig(options = {}) {
         'jest/no-deprecated-functions': 'off',
         'jest/no-jasmine-globals': 'off',
         'jest/no-test-prefixes': 'off',
+        'jest/require-top-level-describe': 'error',
+        // Allow null assertions for tests. Functions should be null safe, even if they don't expect it.
+        '@typescript-eslint/no-non-null-assertion': 'off',
         // Allow accessing private/protected fields in tests
         '@typescript-eslint/dot-notation': [
           'error',
@@ -219,6 +240,22 @@ function getFlatConfig(options = {}) {
             allowProtectedClassPropertyAccess: true,
           },
         ],
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: [
+              {
+                group: [
+                  // Allow importing from the public api for tests only
+                  '!src/src/public-api',
+                  '!src/index',
+                ],
+              },
+            ],
+          },
+        ],
+        'sonarjs/no-clear-text-protocols': 'off', // Ignore for test files like core Sonar does. (not an actual request)
+        'sonarjs/no-nested-functions': 'off', // Ignore for test files like core Sonar does. (ignore because of nested describe blocks)
       },
     }
   );
