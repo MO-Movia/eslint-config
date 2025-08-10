@@ -17,7 +17,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/MO-Movia/eslint-config.git"
+    "url": "https://github.com/MO-Movia/eslint-config"
   },
   "peerDependencies": {
     "eslint": "^9.15.0",
