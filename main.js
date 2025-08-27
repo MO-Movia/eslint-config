@@ -1,3 +1,8 @@
+/**
+ * @copyright Copyright 2025 Modus Operandi Inc. All Rights Reserved.
+ * @file Setup scripts for ESLint.
+ */
+
 // @ts-check
 const eslintjs = require('@eslint/js');
 const typescript_eslint = require('typescript-eslint');
@@ -115,7 +120,8 @@ function getFlatConfig(options = {}) {
         parserOptions: {
           // load all tsconfig files so that closest inclusive one is used.
           project: ['./**/tsconfig.json', './**/tsconfig.*.json'],
-          tsconfigRootDir: '.',
+          projectService: true,
+          tsconfigRootDir: __dirname,
         },
         globals: {
           ...globals.jasmine,
