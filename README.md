@@ -9,6 +9,7 @@ This package contains the core coding standards for all MO apps.
 Before you can start using the eslint-config your application must have the following dev-dependencies associated with your apps version of Angular:
 
 - `eslint`
+- `angular-eslint` (for Angular projects only)
 
 ## Installation & Setup
 
@@ -51,11 +52,4 @@ You may use a different Prittier config for your project, but the one in this pr
 5. The set of import rules that restrict absolute paths, cycles, and useless path segments are there to protect your code base from a variety of edge cases
    that can cause compile/runtime issues for you or your consumers.
 6. "http://" can always be avoided. For URLs, you should always default to "https".
-   For URIs like xml schemes, you should use an imported constant or parameter instead to avoid typo issues.
-
-## Follow-ups
-
-These plugins need to be added/updated once they have official support with ESLint 9
-
-1. https://github.com/import-js/eslint-plugin-import/pull/2996
-2. https://github.com/storybookjs/eslint-plugin-storybook/pull/156
+   For URIs like xml schemes, you should use an imported constant or parameter instead to avoid typos.

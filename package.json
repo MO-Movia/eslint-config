@@ -6,7 +6,11 @@
   "type": "commonjs",
   "license": "MIT",
   "scripts": {
-    "ci:bom": "cyclonedx-npm --ignore-npm-errors --output-format XML --output-file bom.xml"
+    "ci:build": "echo 'nothing to build'",
+    "ci:bom": "npx cyclonedx-npm --ignore-npm-errors --output-format XML --output-file bom.xml",
+    "lint": "echo 'nothing to lint'",
+    "test:coverage": "echo 'nothing to test'",
+    "verify": "npm run lint -- --fix && npm run ci:build && npm run test:coverage && echo 'All Tests Passed!'"
   },
   "publishConfig": {
     "access": "public"
@@ -44,7 +48,6 @@
     "typescript-eslint": "^8.16.0"
   },
   "devDependencies": {
-    "@cyclonedx/cyclonedx-npm": "^2.0.0",
     "@types/eslint__js": "^8.42.3",
     "angular-eslint": ">=18.0.0"
   },

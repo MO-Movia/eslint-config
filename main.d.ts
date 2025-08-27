@@ -1,3 +1,7 @@
+/**
+ * @copyright Copyright 2025 Modus Operandi Inc. All Rights Reserved.
+ * @file Setup scripts for ESLint.
+ */
 // @ts-check
 import type { TSESLint } from '@typescript-eslint/utils';
 
