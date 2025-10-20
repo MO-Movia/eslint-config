@@ -37,7 +37,7 @@ jobs:
 
       - name: NPM Publish
         # Using trusted provider auth https://docs.npmjs.com/trusted-publishers#supported-cicd-providers
-        run: npm publish ./dist --access public --provenance # provenance requires a github hosted runner
+        run: npm publish ./ --access public --provenance # provenance requires a github hosted runner
 
       - name: Set Version number
         run: echo "TAG=$(npm pkg get version --workspaces=false | tr -d \")" >> "$GITHUB_ENV"
