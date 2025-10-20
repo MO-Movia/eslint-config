@@ -1,21 +1,38 @@
 /**
+ * @license MIT
  * @copyright Copyright 2025 Modus Operandi Inc. All Rights Reserved.
  * @file Setup scripts for ESLint.
  */
 
 // @ts-check
 const eslintjs = require('@eslint/js');
+const { defineConfig } = require('eslint/config');
 const typescript_eslint = require('typescript-eslint');
 const prettier = require('eslint-plugin-prettier/recommended');
 const globals = require('globals');
 const jest = require('eslint-plugin-jest');
 const importPlugin = require('eslint-plugin-import');
+const pluginSecurity = require('eslint-plugin-security');
 const sonar = require('eslint-plugin-sonarjs');
+/**
+ * @type { import("@eslint/config-helpers").Plugin }
+ */
+let headers;
+try {
+  headers = require('eslint-plugin-headers');
+} catch {
+  // @ts-ignore If not installed assume rule is disabled. Lint will error if missing but expected.
+  headers = null;
+}
+
+/**
+ * @type {{ configs: any; processInlineTemplates: any; default?: any; templateParser?: any; templatePlugin?: any; tsPlugin?: any; }}
+ */
 let angularLint;
 try {
   angularLint = require('angular-eslint');
-} catch (e) {
-  // filler
+} catch {
+  // angular-eslint not installed, use filler to avoid errors.
   angularLint = {
     processInlineTemplates: undefined,
     configs: {
@@ -29,30 +46,23 @@ try {
 }
 /**
  * Base recommended rules. Angular projects should also use {@link ngRecommended} and {@link templateRecommended}
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
  */
 const tsRecommendedBase = [
   eslintjs.configs.recommended,
   ...typescript_eslint.configs.recommendedTypeChecked,
   importPlugin.flatConfigs?.recommended,
   importPlugin.flatConfigs?.typescript,
+  pluginSecurity.configs.recommended,
   sonar.configs.recommended,
 ];
-/**
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
- */
+
 const tsRecommendedStrict = [
   ...tsRecommendedBase,
   ...typescript_eslint.configs.stylisticTypeChecked,
   prettier,
 ];
-/**
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
- */
+
 const ngRecommended = [...angularLint.configs.tsRecommended];
-/**
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
- */
 const templateRecommended = [
   ...angularLint.configs.templateRecommended,
   // accessibility included because it overlaps with sonar html rules
@@ -73,16 +83,31 @@ const TEST_FILES = [
   // test init file
   '**/test.ts',
 ];
+
 /**
  * All tsconfig files in project are considered when linting.
  *
- * @param { {strict?: boolean, appPrefix?: string } | undefined } options config for base ruleset.
- * - appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
- * - strict { boolean | undefined | null } Whether to use the stricter set of rule configurations. default false
- * @returns a preconfigured flat ESLint configuration
+ * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string } } } options config for base ruleset.
+ * - appPrefix `string | undefined | null` Angular App/Lib prefix. default none (non-angular project)
+ * - strict `boolean | undefined | null` Whether to use the stricter set of rule configurations. default false
+ * - header `{ license?: string, copyright: string }` License and copyright information. Or explicitly set to false to disable.
+ * @throws Error if config is invalid
  */
-function getFlatConfig(options = {}) {
-  const strict = !!options.strict;
+function validateConfig(options) {
+  if (!options?.header?.copyright) {
+    throw new Error('current copyright text required');
+  }
+}
+
+/**
+ * All tsconfig files in project are considered when linting.
+ *
+ * @param { { appPrefix?: string } } options config for base ruleset.
+ * - appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
+ * @returns true if Angular config is definded
+ * @throws Error if Angular config is definded, but angular-eslint is not installed.
+ */
+function isAngularConfig(options) {
   const isAngular = !!(
     typeof options.appPrefix === 'string' && options.appPrefix.trim() !== ''
   );
@@ -91,8 +116,27 @@ function getFlatConfig(options = {}) {
       'angular-eslint not installed! Install angular-eslint or remove appPrefix from config.'
     );
   }
+  return isAngular;
+}
+
+/**
+ * All tsconfig files in project are considered when linting.
+ *
+ * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string }} } options config for base ruleset.
+ * - appPrefix `string | undefined | null` Angular App/Lib prefix. default none (non-angular project)
+ * - strict `boolean | undefined | null` Whether to use the stricter set of rule configurations. default false
+ * - header `{ license?: string, copyright: string }` License and copyright information. Or explicitly set to false to disable (not recommended).
+ * @throws Error if appPrefix is set but angular-eslit is not innstalled
+ * @throws Error if header is not defined
+ * @returns a preconfigured flat ESLint configuration
+ */
+function getFlatConfig(options) {
+  validateConfig(options);
+  const isAngular = isAngularConfig(options);
   const app = options.appPrefix;
-  return typescript_eslint.default.config(
+  const strict = !!options.strict;
+  const enabledOnStrict = strict ? 'error' : 'off';
+  return defineConfig(
     {
       name: 'Global',
       ignores: [
@@ -131,18 +175,24 @@ function getFlatConfig(options = {}) {
       },
       rules: {
         'eslint/no-ternary': 'off', // Turned on by sonar-lint. Nested is still banned so this is overly strict.
+        '@typescript-eslint/consistent-type-imports': [
+          // Helps remove unnecesary imports from compliation, improving tree shaking.
+          enabledOnStrict,
+          {
+            fixStyle: 'separate-type-imports',
+            prefer: 'type-imports',
+          },
+        ],
         '@typescript-eslint/unbound-method': 'off', // these are rarely typed correctly in external libraries
-        '@typescript-eslint/explicit-function-return-type': strict // Speeds up static analysis and ensures consistent interface types
-          ? 'error'
-          : 'off',
-        '@typescript-eslint/no-unsafe-argument': strict ? 'error' : 'off',
-        '@typescript-eslint/no-unsafe-assignment': strict ? 'error' : 'off',
-        '@typescript-eslint/no-unsafe-call': strict ? 'error' : 'off',
-        '@typescript-eslint/no-unsafe-member-access': strict ? 'error' : 'off',
-        // emulate default tsc rules
+        '@typescript-eslint/explicit-function-return-type': enabledOnStrict, // Speeds up static analysis and ensures consistent interface types
+        '@typescript-eslint/no-unsafe-argument': enabledOnStrict,
+        '@typescript-eslint/no-unsafe-assignment': enabledOnStrict,
+        '@typescript-eslint/no-unsafe-call': enabledOnStrict,
+        '@typescript-eslint/no-unsafe-member-access': enabledOnStrict,
         '@typescript-eslint/no-unused-vars': [
           'error',
           {
+            // emulate default tsc rules
             args: 'all',
             argsIgnorePattern: '^_',
             caughtErrors: 'all',
@@ -152,8 +202,7 @@ function getFlatConfig(options = {}) {
             ignoreRestSiblings: true,
           },
         ],
-        // use ngx-logger or equivelent instead of console for info/debug logs
-        'no-console': ['error', { allow: ['warn', 'error'] }],
+        'no-console': ['error', { allow: ['warn', 'error'] }], // use ngx-logger or equivelent instead of console for info/debug logs
         'prefer-arrow-callback': 'error',
         'import/no-unresolved': 'off', // checked by ts
         'import/namespace': 'off', // not suppoted yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/3099
@@ -161,6 +210,7 @@ function getFlatConfig(options = {}) {
         'import/no-extraneous-dependencies': [
           'error',
           {
+            // Only test files may use dev devDependencies
             devDependencies: TEST_FILES,
           },
         ],
@@ -168,7 +218,11 @@ function getFlatConfig(options = {}) {
         'import/no-cycle': 'error',
         'import/no-self-import': 'error',
         'import/no-useless-path-segments': 'warn',
-        'sonarjs/no-unsafe-unzip': 'off', // cannot be satisfied. Track is SonarQube instead
+        'security/detect-object-injection': 'off', // Not input/type aware. Typescript already blocks unsafe access/assignment, and this rule blocks the legitimate use of maps/array-index.
+        'security/detect-unsafe-regex': enabledOnStrict, // too many false positives. Does not recognize match capping `{x,z}` as a proper fix.
+        // Cannot be satisfied. There is no standard regex escape function, and it does not recognize when match text was normalized.
+        'security/detect-non-literal-regexp': enabledOnStrict, // For strict, regex should be avoided except for very simple literals.
+        'sonarjs/no-unsafe-unzip': 'off', // cannot be satisfied. Track in SonarQube instead.
         'sonarjs/function-return-type': 'off', // is too often wrong due to libraries not setting this properly.
         'sonarjs/deprecation': 'off', // missing context info for filtering. Use more accurate report from Sonar.
         'no-restricted-imports': [
@@ -269,20 +323,58 @@ function getFlatConfig(options = {}) {
         'sonarjs/no-clear-text-protocols': 'off', // Ignore for test files like core Sonar does. (not an actual request)
         'sonarjs/no-nested-functions': 'off', // Ignore for test files like core Sonar does. (ignore because of nested describe blocks)
       },
+    },
+    {
+      name: 'Typescript Headers',
+      files: ['**/*.ts', '**/*.tsx'],
+      plugins: { headers },
+      rules: {
+        'headers/header-format': [
+          'error',
+          {
+            source: 'string',
+            // allow no space/text after license, but auto-fill requires at least one space.
+            content: '@license(license) \n@copyright(copyright)',
+            patterns: {
+              license: {
+                pattern: String.raw`[\s\w-]{0,25}`,
+                defaultValue: options.header.license ?? ' ',
+              },
+              copyright: {
+                pattern: '[ \n][\\s\\w\n\r*-]{0,250}',
+                defaultValue:
+                  ' ' +
+                  options.header.copyright
+                    // cleanup possible newline at end. Allow at start.
+                    .trimEnd()
+                    // Make sure new lines start with '*'
+                    .replaceAll('\n', '\n * ')
+                    // fix any redundent changes
+                    .replaceAll('\n *  * ', '\n * '),
+              },
+            },
+            trailingNewlines: 2, // for 1 space after header
+          },
+        ],
+      },
     }
   );
 }
+
 /**
- * A default configuration for Angular apps and libraries
+ * Default license for Modus open source code.
+ * @type { { mit: { license: string, copyright: string }, manual: { license: string, copyright: string }} }
  */
-exports.angularRecommended = () =>
-  getFlatConfig({
-    appPrefix: 'mo',
-    strict: false,
-  });
-/**
- * Adefault configuration for plain typescript apps and libraries
- */
-exports.tsRecommended = () => getFlatConfig();
+exports.header = {
+  mit: {
+    license: 'MIT',
+    copyright: `Copyright ${new Date().getFullYear().toString()} Modus Operandi Inc. All Rights Reserved.`,
+  },
+  manual: {
+    license: ' ',
+    copyright: 'TODO',
+  },
+};
+
 exports.getFlatConfig = getFlatConfig;
 exports.default = getFlatConfig;
