@@ -17,7 +17,7 @@ export const header: {
 /**
  * All tsconfig files in project are considered when linting.
  *
- * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string } | false } } options config for base ruleset.
+ * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string } } } options config for base ruleset.
  * - appPrefix `string | undefined | null` Angular App/Lib prefix. default none (non-angular project)
  * - strict `boolean | undefined | null` Whether to use the stricter set of rule configurations. default false
  * - header `{ license?: string, copyright: string }` License and copyright information. Or explicitly set to false to disable (not recommended).

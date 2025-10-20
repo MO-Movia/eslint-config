@@ -6,6 +6,7 @@
 
 // @ts-check
 const eslintjs = require('@eslint/js');
+const { defineConfig } = require('eslint/config');
 const typescript_eslint = require('typescript-eslint');
 const prettier = require('eslint-plugin-prettier/recommended');
 const globals = require('globals');
@@ -13,7 +14,9 @@ const jest = require('eslint-plugin-jest');
 const importPlugin = require('eslint-plugin-import');
 const pluginSecurity = require('eslint-plugin-security');
 const sonar = require('eslint-plugin-sonarjs');
-/** @type { Omit<import('@typescript-eslint/utils/ts-eslint').FlatConfig.Plugin, 'configs'>  } */
+/**
+ * @type { import("@eslint/config-helpers").Plugin }
+ */
 let headers;
 try {
   headers = require('eslint-plugin-headers');
@@ -22,7 +25,9 @@ try {
   headers = null;
 }
 
-/** @type { { processInlineTemplates: undefined | object, configs: Record<string, import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray>} } */
+/**
+ * @type {{ configs: any; processInlineTemplates: any; default?: any; templateParser?: any; templatePlugin?: any; tsPlugin?: any; }}
+ */
 let angularLint;
 try {
   angularLint = require('angular-eslint');
@@ -41,7 +46,6 @@ try {
 }
 /**
  * Base recommended rules. Angular projects should also use {@link ngRecommended} and {@link templateRecommended}
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
  */
 const tsRecommendedBase = [
   eslintjs.configs.recommended,
@@ -51,21 +55,14 @@ const tsRecommendedBase = [
   pluginSecurity.configs.recommended,
   sonar.configs.recommended,
 ];
-/**
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
- */
+
 const tsRecommendedStrict = [
   ...tsRecommendedBase,
   ...typescript_eslint.configs.stylisticTypeChecked,
   prettier,
 ];
-/**
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
- */
+
 const ngRecommended = [...angularLint.configs.tsRecommended];
-/**
- * @type { import('@typescript-eslint/utils/ts-eslint').FlatConfig.ConfigArray}
- */
 const templateRecommended = [
   ...angularLint.configs.templateRecommended,
   // accessibility included because it overlaps with sonar html rules
@@ -90,14 +87,14 @@ const TEST_FILES = [
 /**
  * All tsconfig files in project are considered when linting.
  *
- * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string } | false } } options config for base ruleset.
+ * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string } } } options config for base ruleset.
  * - appPrefix `string | undefined | null` Angular App/Lib prefix. default none (non-angular project)
  * - strict `boolean | undefined | null` Whether to use the stricter set of rule configurations. default false
  * - header `{ license?: string, copyright: string }` License and copyright information. Or explicitly set to false to disable.
  * @throws Error if config is invalid
  */
 function validateConfig(options) {
-  if (options?.header !== false && !options?.header?.copyright) {
+  if (!options?.header?.copyright) {
     throw new Error('current copyright text required');
   }
 }
@@ -125,7 +122,7 @@ function isAngularConfig(options) {
 /**
  * All tsconfig files in project are considered when linting.
  *
- * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string } | false } } options config for base ruleset.
+ * @param { {strict?: boolean, appPrefix?: string, header: { license?: string, copyright: string }} } options config for base ruleset.
  * - appPrefix `string | undefined | null` Angular App/Lib prefix. default none (non-angular project)
  * - strict `boolean | undefined | null` Whether to use the stricter set of rule configurations. default false
  * - header `{ license?: string, copyright: string }` License and copyright information. Or explicitly set to false to disable (not recommended).
@@ -139,7 +136,7 @@ function getFlatConfig(options) {
   const app = options.appPrefix;
   const strict = !!options.strict;
   const enabledOnStrict = strict ? 'error' : 'off';
-  return typescript_eslint.default.config(
+  return defineConfig(
     {
       name: 'Global',
       ignores: [
@@ -178,6 +175,14 @@ function getFlatConfig(options) {
       },
       rules: {
         'eslint/no-ternary': 'off', // Turned on by sonar-lint. Nested is still banned so this is overly strict.
+        '@typescript-eslint/consistent-type-imports': [
+          // Helps remove unnecesary imports from compliation, improving tree shaking.
+          enabledOnStrict,
+          {
+            fixStyle: 'separate-type-imports',
+            prefer: 'type-imports',
+          },
+        ],
         '@typescript-eslint/unbound-method': 'off', // these are rarely typed correctly in external libraries
         '@typescript-eslint/explicit-function-return-type': enabledOnStrict, // Speeds up static analysis and ensures consistent interface types
         '@typescript-eslint/no-unsafe-argument': enabledOnStrict,
@@ -320,42 +325,38 @@ function getFlatConfig(options) {
       },
     },
     {
-      ...(options.header
-        ? {
-            name: 'Typescript Headers',
-            files: ['**/*.ts', '**/*.tsx'],
-            plugins: { headers },
-            rules: {
-              'headers/header-format': [
-                'error',
-                {
-                  source: 'string',
-                  // allow no space/text after license, but auto-fill requires at least one space.
-                  content: '@license(license) \n@copyright(copyright)',
-                  patterns: {
-                    license: {
-                      pattern: '[\\s\\w-]{0,25}',
-                      defaultValue: options.header.license ?? ' ',
-                    },
-                    copyright: {
-                      pattern: '[ \n][\\s\\w\n\r*-]{0,250}',
-                      defaultValue:
-                        ' ' +
-                        options.header.copyright
-                          // cleanup possible newline at end. Allow at start.
-                          .trimEnd()
-                          // Make sure new lines start with '*'
-                          .replaceAll('\n', '\n * ')
-                          // fix any redundent changes
-                          .replaceAll('\n *  * ', '\n * '),
-                    },
-                  },
-                  trailingNewlines: 2, // for 1 space after header
-                },
-              ],
+      name: 'Typescript Headers',
+      files: ['**/*.ts', '**/*.tsx'],
+      plugins: { headers },
+      rules: {
+        'headers/header-format': [
+          'error',
+          {
+            source: 'string',
+            // allow no space/text after license, but auto-fill requires at least one space.
+            content: '@license(license) \n@copyright(copyright)',
+            patterns: {
+              license: {
+                pattern: String.raw`[\s\w-]{0,25}`,
+                defaultValue: options.header.license ?? ' ',
+              },
+              copyright: {
+                pattern: '[ \n][\\s\\w\n\r*-]{0,250}',
+                defaultValue:
+                  ' ' +
+                  options.header.copyright
+                    // cleanup possible newline at end. Allow at start.
+                    .trimEnd()
+                    // Make sure new lines start with '*'
+                    .replaceAll('\n', '\n * ')
+                    // fix any redundent changes
+                    .replaceAll('\n *  * ', '\n * '),
+              },
             },
-          }
-        : {}),
+            trailingNewlines: 2, // for 1 space after header
+          },
+        ],
+      },
     }
   );
 }
