@@ -338,7 +338,9 @@ function getFlatConfig(options) {
             patterns: {
               license: {
                 pattern: String.raw`[\s\w-]{0,25}`,
-                defaultValue: options.header.license ?? ' ',
+                defaultValue: options.header.license
+                  ? ' ' + options.header.license.trim()
+                  : ' ',
               },
               copyright: {
                 pattern: '[ \n][\\s\\w\n\r*-]{0,250}',
