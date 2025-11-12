@@ -163,7 +163,6 @@ function getFlatConfig(options) {
       languageOptions: {
         parserOptions: {
           // load all tsconfig files so that closest inclusive one is used.
-          project: ['./**/tsconfig.json', './**/tsconfig.*.json'],
           projectService: true,
           tsconfigRootDir: __dirname,
         },
