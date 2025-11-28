@@ -184,6 +184,7 @@ function getFlatConfig(options) {
         ],
         '@typescript-eslint/unbound-method': 'off', // these are rarely typed correctly in external libraries
         '@typescript-eslint/explicit-function-return-type': enabledOnStrict, // Speeds up static analysis and ensures consistent interface types
+        '@typescript-eslint/no-redundant-type-constituents': 'off', // Usefull for explicit compatibility and TSDoc purposes. TS-Lint 8.48.0 made this rule incompatible with strictNullChecks off.
         '@typescript-eslint/no-unsafe-argument': enabledOnStrict,
         '@typescript-eslint/no-unsafe-assignment': enabledOnStrict,
         '@typescript-eslint/no-unsafe-call': enabledOnStrict,
