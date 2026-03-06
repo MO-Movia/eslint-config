@@ -1,6 +1,6 @@
 {
   "name": "@modusoperandi/eslint-config",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Module containing the lint configuring for MO",
   "main": "main.js",
   "type": "commonjs",
@@ -11,19 +11,18 @@
   },
   "scripts": {
     "ci:build": "echo 'nothing to build'",
-    "ci:bom": "npx cyclonedx-npm --ignore-npm-errors --output-format XML --output-file bom.xml",
+    "ci:bom": "npx @cyclonedx/cyclonedx-npm --ignore-npm-errors --output-format XML --output-file bom.xml",
     "lint": "echo 'nothing to lint'",
     "test:coverage": "echo 'nothing to test'",
     "update": "npx npm-check-updates --peer --target semver -u && npm update && npm i",
     "verify": "npm run lint -- --fix && npm run ci:build && npm run test:coverage && echo 'All Tests Passed!'"
   },
   "files": [
-    "main.js",
-    "main.d.ts"
+    "main.js"
   ],
   "peerDependencies": {
     "eslint": "^9.0.0",
-    "angular-eslint": ">=18"
+    "angular-eslint": ">=18.0.0"
   },
   "peerDependenciesMeta": {
     "angular-eslint": {
@@ -40,14 +39,12 @@
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jest": "^29.2.1",
     "eslint-plugin-prettier": "^5.5.4",
-    "eslint-plugin-security": "^3.0.1",
-    "eslint-plugin-sonarjs": "^3.0.5",
-    "globals": "^16.5.0",
+    "eslint-plugin-security": "^4.0.0",
+    "globals": "^17.4.0",
     "prettier": "^3.7.1",
     "typescript-eslint": "^8.48.0"
   },
   "devDependencies": {
-    "@types/eslint-plugin-security": "^3.0.0",
     "angular-eslint": ">=18.0.0"
   }
 }

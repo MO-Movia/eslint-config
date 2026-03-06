@@ -5,7 +5,7 @@
  */
 
 // @ts-check
-const eslintjs = require('@eslint/js');
+const eslintJs = require('@eslint/js');
 const { defineConfig } = require('eslint/config');
 const typescript_eslint = require('typescript-eslint');
 const prettier = require('eslint-plugin-prettier/recommended');
@@ -13,7 +13,7 @@ const globals = require('globals');
 const jest = require('eslint-plugin-jest');
 const importPlugin = require('eslint-plugin-import');
 const pluginSecurity = require('eslint-plugin-security');
-const sonar = require('eslint-plugin-sonarjs');
+
 /**
  * @type { import("@eslint/config-helpers").Plugin }
  */
@@ -26,34 +26,24 @@ try {
 }
 
 /**
- * @type {{ configs: any; processInlineTemplates: any; default?: any; templateParser?: any; templatePlugin?: any; tsPlugin?: any; }}
+ * @type { import("angular-eslint") | null}
  */
 let angularLint;
 try {
   angularLint = require('angular-eslint');
 } catch {
   // angular-eslint not installed, use filler to avoid errors.
-  angularLint = {
-    processInlineTemplates: undefined,
-    configs: {
-      tsAll: [],
-      tsRecommended: [],
-      templateAll: [],
-      templateRecommended: [],
-      templateAccessibility: [],
-    },
-  };
+  angularLint = null;
 }
 /**
  * Base recommended rules. Angular projects should also use {@link ngRecommended} and {@link templateRecommended}
  */
 const tsRecommendedBase = [
-  eslintjs.configs.recommended,
+  eslintJs.configs.recommended,
   ...typescript_eslint.configs.recommendedTypeChecked,
   importPlugin.flatConfigs?.recommended,
   importPlugin.flatConfigs?.typescript,
   pluginSecurity.configs.recommended,
-  sonar.configs.recommended,
 ];
 
 const tsRecommendedStrict = [
@@ -62,13 +52,18 @@ const tsRecommendedStrict = [
   prettier,
 ];
 
-const ngRecommended = [...angularLint.configs.tsRecommended];
+const ngRecommended = [...(angularLint?.configs.tsRecommended ?? [])];
 const templateRecommended = [
-  ...angularLint.configs.templateRecommended,
+  ...(angularLint?.configs.templateRecommended ?? []),
   // accessibility included because it overlaps with sonar html rules
-  ...angularLint.configs.templateAccessibility,
+  ...(angularLint?.configs.templateAccessibility ?? []),
   prettier,
 ];
+
+/** Files matcher used for typescript files. */
+const TS_FILES = ['**/*.ts', '**/*.tsx']
+
+/** Files matcher used for test files. */
 const TEST_FILES = [
   // Test Resources
   '**/testing/**/*.ts',
@@ -104,8 +99,8 @@ function validateConfig(options) {
  *
  * @param { { appPrefix?: string } } options config for base ruleset.
  * - appPrefix { string | undefined | null } Angular App/Lib prefix. default none (non-angular project)
- * @returns true if Angular config is definded
- * @throws Error if Angular config is definded, but angular-eslint is not installed.
+ * @returns true if Angular config is defined
+ * @throws Error if Angular config is defined, but angular-eslint is not installed.
  */
 function isAngularConfig(options) {
   const isAngular = !!(
@@ -126,7 +121,7 @@ function isAngularConfig(options) {
  * - appPrefix `string | undefined | null` Angular App/Lib prefix. default none (non-angular project)
  * - strict `boolean | undefined | null` Whether to use the stricter set of rule configurations. default false
  * - header `{ license?: string, copyright: string }` License and copyright information. Or explicitly set to false to disable (not recommended).
- * @throws Error if appPrefix is set but angular-eslit is not innstalled
+ * @throws Error if appPrefix is set but angular-eslint is not installed
  * @throws Error if header is not defined
  * @returns a preconfigured flat ESLint configuration
  */
@@ -153,13 +148,13 @@ function getFlatConfig(options) {
     },
     {
       name: 'Typescript',
-      files: ['**/*.ts', '**/*.tsx'],
+      files: TS_FILES,
       extends: [
         ...(strict ? tsRecommendedStrict : tsRecommendedBase),
         ...(isAngular ? ngRecommended : []),
       ],
       // can't use processor: undefined because of runtime bug in eslint.
-      ...(isAngular ? { processor: angularLint.processInlineTemplates } : {}),
+      ...(angularLint && isAngular ? { processor: angularLint.processInlineTemplates } : {}),
       languageOptions: {
         parserOptions: {
           // load all tsconfig files so that closest inclusive one is used.
@@ -167,15 +162,13 @@ function getFlatConfig(options) {
           tsconfigRootDir: __dirname,
         },
         globals: {
-          ...globals.jasmine,
-          ...globals.jest,
           ...globals['shared-node-browser'],
         },
       },
       rules: {
-        'eslint/no-ternary': 'off', // Turned on by sonar-lint. Nested is still banned so this is overly strict.
+        'eslint/no-ternary': 'off', // Nested is still banned so this is overly strict.
         '@typescript-eslint/consistent-type-imports': [
-          // Helps remove unnecesary imports from compliation, improving tree shaking.
+          // Helps remove unnecessary imports from compilation, improving tree shaking.
           enabledOnStrict,
           {
             fixStyle: 'separate-type-imports',
@@ -184,7 +177,7 @@ function getFlatConfig(options) {
         ],
         '@typescript-eslint/unbound-method': 'off', // these are rarely typed correctly in external libraries
         '@typescript-eslint/explicit-function-return-type': enabledOnStrict, // Speeds up static analysis and ensures consistent interface types
-        '@typescript-eslint/no-redundant-type-constituents': 'off', // Usefull for explicit compatibility and TSDoc purposes. TS-Lint 8.48.0 made this rule incompatible with strictNullChecks off.
+        '@typescript-eslint/no-redundant-type-constituents': 'off', // Useful for explicit compatibility and TSDoc purposes. TS-Lint 8.48.0 made this rule incompatible with strictNullChecks off.
         '@typescript-eslint/no-unsafe-argument': enabledOnStrict,
         '@typescript-eslint/no-unsafe-assignment': enabledOnStrict,
         '@typescript-eslint/no-unsafe-call': enabledOnStrict,
@@ -202,11 +195,11 @@ function getFlatConfig(options) {
             ignoreRestSiblings: true,
           },
         ],
-        'no-console': ['error', { allow: ['warn', 'error'] }], // use ngx-logger or equivelent instead of console for info/debug logs
+        'no-console': ['error', { allow: ['warn', 'error'] }], // use ngx-logger or equivalent instead of console for info/debug logs
         'prefer-arrow-callback': 'error',
         'import/no-unresolved': 'off', // checked by ts
-        'import/namespace': 'off', // not suppoted yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/3099
-        'import/no-deprecated': 'off', // covered by sonar and not suppoted yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/2245
+        'import/namespace': 'off', // not supported yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/3099
+        'import/no-deprecated': 'off', // covered by sonar and not supported yet for ESLint 9 https://github.com/import-js/eslint-plugin-import/issues/2245
         'import/no-extraneous-dependencies': [
           'error',
           {
@@ -222,9 +215,6 @@ function getFlatConfig(options) {
         'security/detect-unsafe-regex': enabledOnStrict, // too many false positives. Does not recognize match capping `{x,z}` as a proper fix.
         // Cannot be satisfied. There is no standard regex escape function, and it does not recognize when match text was normalized.
         'security/detect-non-literal-regexp': enabledOnStrict, // For strict, regex should be avoided except for very simple literals.
-        'sonarjs/no-unsafe-unzip': 'off', // cannot be satisfied. Track in SonarQube instead.
-        'sonarjs/function-return-type': 'off', // is too often wrong due to libraries not setting this properly.
-        'sonarjs/deprecation': 'off', // missing context info for filtering. Use more accurate report from Sonar.
         'no-restricted-imports': [
           'error',
           {
@@ -286,6 +276,13 @@ function getFlatConfig(options) {
     {
       name: 'Test Files',
       ...jest.configs['flat/recommended'],
+      languageOptions: {
+        globals: {
+          ...globals.jasmine,
+          ...globals.jest,
+          ...globals['shared-node-browser'],
+        },
+      },
       files: TEST_FILES,
       rules: {
         ...jest.configs['flat/recommended'].rules,
@@ -320,8 +317,6 @@ function getFlatConfig(options) {
             ],
           },
         ],
-        'sonarjs/no-clear-text-protocols': 'off', // Ignore for test files like core Sonar does. (not an actual request)
-        'sonarjs/no-nested-functions': 'off', // Ignore for test files like core Sonar does. (ignore because of nested describe blocks)
       },
     },
     {
@@ -351,7 +346,7 @@ function getFlatConfig(options) {
                     .trimEnd()
                     // Make sure new lines start with '*'
                     .replaceAll('\n', '\n * ')
-                    // fix any redundent changes
+                    // fix any redundant changes
                     .replaceAll('\n *  * ', '\n * '),
               },
             },
@@ -365,18 +360,32 @@ function getFlatConfig(options) {
 
 /**
  * Default license for Modus open source code.
- * @type { { mit: { license: string, copyright: string }, manual: { license: string, copyright: string }} }
+ * @type { { license: string, copyright: string } }
  */
-exports.header = {
-  mit: {
-    license: 'MIT',
-    copyright: `Copyright ${new Date().getFullYear().toString()} Modus Operandi Inc. All Rights Reserved.`,
-  },
-  manual: {
+const mit = {
+  license: 'MIT',
+  copyright: `Copyright ${new Date().getFullYear().toString()} Modus Operandi Inc. All Rights Reserved.`,
+}
+
+/**
+ * Default license for multi-copyright code. Auto fix will stub with TO-DO comment
+ * @type { { license: string, copyright: string } }
+ */
+const manual = {
     license: ' ',
     copyright: 'TODO',
-  },
+  }
+
+/**
+ * Default licenses for Modus open source code.
+ */
+const header = {
+  mit,
+  manual,
 };
 
+exports.header = header;
+exports.TS_FILES = TS_FILES;
+exports.TEST_FILES = TEST_FILES;
 exports.getFlatConfig = getFlatConfig;
 exports.default = getFlatConfig;
