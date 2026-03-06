@@ -20,13 +20,13 @@ Before you can start using the eslint-config your application must have the foll
 3. Change `mo` to the prefix of your Angular app/lib, or remove that line if this isn't an Angular project.
 4. Run `ng lint` (Angular) or `eslint` (Basic) in a script to ensure functionality. Add `--max-warnings=0` to make these rules strict, or `--quite` to ignore warnings.
 
-You may use a different Prittier config for your project, but the one in this project is recommended. It is recommended to limit edits to the prettierrc to compatibility reasons, and to respect the stylistic defaults.
+You may use a different Prettier config for your project, but the one in this project is recommended. It is recommended to limit edits to the prettierrc to compatibility reasons, and to respect the stylistic defaults.
 
 ### Optional
 
 1. Add the .gitattributes from this project to your project to prevent End Of Line (EOL) issues in your repo.
-2. If you are using VSCode, Make sure you have the following extensions that help with these rules.
-
+2. You can extend this config using [sonar-lint](https://www.npmjs.com/package/eslint-plugin-sonarjs), but not recommended because it is not equivalent to the IDE plugin or CI scan.
+3. If you are using VSCode, Make sure you have the following extensions that help with these rules.
 - [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) (you may need to turn on "use flat config" setting)
 - [Angular Language Service](https://marketplace.visualstudio.com/items?itemName=Angular.ng-template)
 - [SonarLint](https://marketplace.visualstudio.com/items?itemName=SonarSource.sonarlint-vscode)
@@ -36,7 +36,7 @@ You may use a different Prittier config for your project, but the one in this pr
 
 1. Do steps 2 + 3 from the setup.
 2. Change 'mo' in the config file to the prefix you are using for your Angular app/lib if necessary. The prefix overrides are part of the shared config.
-3. If you have any rule overrides aside from the 2 Angular prefix rules, add them as shown [here](https://eslint.org/docs/latest/extend/shareable-configs#overriding-settings-from-shareable-configs) in accordence with the new ESLint flat config.
+3. If you have any rule overrides aside from the 2 Angular prefix rules, add them as shown [here](https://eslint.org/docs/latest/extend/shareable-configs#overriding-settings-from-shareable-configs) in accordance with the new ESLint flat config.
 4. Delete your old eslint config file.
 
 ## Migrating from v2 to v3
